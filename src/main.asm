@@ -47,6 +47,5 @@ main:
     jmp .halt
 
 msg_hello: db 'Hello World!', ENDL, 0   ; This is where the string is defined
-
 times 510-($-$$) db 0
 dw 0AA55H
