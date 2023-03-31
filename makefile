@@ -3,7 +3,7 @@ ASM=nasm
 SRC_DIR=src
 BUILD_DIR=build
 
-.PHONY : run
+.PHONY : run clean
 
 $(BUILD_DIR)/main_floppy.img: $(BUILD_DIR)/main.bin
 	cp $(BUILD_DIR)/main.bin $(BUILD_DIR)/main_floppy.img
@@ -15,3 +15,6 @@ $(BUILD_DIR)/main.bin: $(SRC_DIR)/main.asm
 
 run:
 	qemu-system-i386 -nographic -fda build/main_floppy.img
+
+clean:
+	rm build/*
