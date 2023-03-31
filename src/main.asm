@@ -1,6 +1,9 @@
 org 0x7C00
 bits 16
 
+;macro for a newline
+%define ENDL 0x0D, 0x0A
+
 start:
     jmp main
 
@@ -41,13 +44,15 @@ main:
     ; stack grows downward untill it hits adress 0x7C00
     ; Stack is first in first out memory 
     ; The zero here is the begaining of the os
+    mov si, msg_hello       ; putting the string hello into the si register
+    call puts
 
     hlt
 
 .halt:
     jmp .halt
 
-msg_hello: 'Hello World!', 0        ;This is where the string is defined
+msg_hello: db 'Hello World!', ENDL, 0      ;This is where the string is defined
 
 
 times 510-($-$$) db 0
