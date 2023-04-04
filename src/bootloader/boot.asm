@@ -86,7 +86,6 @@ main:
 
     cli
     hlt
-
 ;
 ;   Error handeling 
 ;
