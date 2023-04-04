@@ -37,8 +37,5 @@ $(BUILD_DIR)/kernel.bin: always
 always:
 	mkdir -p $(BUILD_DIR)
 
-run:
-	qemu-system-i386 -nographic -fda build/main_floppy.img
-
 clean:
 	rm  -rf $(BUILD_DIR)/*
