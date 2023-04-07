@@ -103,11 +103,9 @@ wait_key_and_reboot:
     cli                                     ;disable interupts
     hlt
 
-
 ;
 ;   Disk routine
 ;
-
 ;
 ;   Convert a LBA adress to a chs address
 ;   Params
