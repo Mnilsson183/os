@@ -1,3 +1,4 @@
+; 26:04
 org 0x7C00
 bits 16
 
@@ -33,7 +34,79 @@ ebr_volume_label:               db 'MNILSSON183'        ;any 11 byte string padd
 ebr_system_id:                  db 'FAT12   '              ; 8 bytes padded
 
 start:
-    jmp main
+       mov ax, 0                           ; cannot write to ds/ ex directly
+    mov ds, ax
+    mov es, ax
+                                        ; Init stack
+    mov ss, ax                          ; ss is the first starting section of the stack
+    mov sp, 0x7C00                      ; sp is the last location of the stack
+                                        ; stack grows downward untill it hits adress 0x7C00
+                                        ; Stack is first in first out memory 
+                                        ; The zero here is the begaining of the os
+    ; Maybe needed for some bioses
+    push es;
+    psuh word .after
+    retf
+.after:
+    ;read here
+    mov [ebr_drive_number], dl
+
+    ; Show a loading message
+    mov si, msg_loading                  ; putting the string hello into the si register
+    call puts
+
+    ;read the drive params
+    push es 
+    mov ah, 08h
+    int 13h
+    jc floppy_error
+    pop es
+
+
+    and cl, 0x3F
+    xor ch, ch
+    mov [bdb_sectors_per_track], cx
+
+    inc dh
+    mov [bdb_heads], dh
+
+    ;read fat
+    mov ax, [bdb_sectors_per_fat]
+    mov dl, [bdb_fat_count]
+    xor bh, bh
+    mul bx
+    add ax, [bdb_reserved_sectors]
+    push ax
+
+    mov ax, [bdb_sectors_per_fat]
+    shl ax, 5
+    xor dx, dx
+    div word [bdb_bytes_per_sector]
+
+    test dx, dx
+    jz root_dir_after
+    inc ax
+
+.root_dir_after:
+    ;read root dir
+    mov cl, al
+    pop ax
+    mov dl, [ebr_drive_number]
+    mov dx, buffer
+    call disk_read
+
+
+    ;search for kernel
+    xor bx, bx
+    mov di, buffer
+
+.search_kernel:
+    mov si, file_kernel_bin
+
+    cli
+    hlt
+
+
 ; This is a function to print a string to the screen
 ; put string
 ;Params
@@ -62,30 +135,6 @@ puts:
     pop ax                              ; I no longer need these registers
     pop si
     ret
-
-main:
-    mov ax, 0                           ; cannot write to ds/ ex directly
-    mov ds, ax
-    mov es, ax
-                                        ; Init stack
-    mov ss, ax                          ; ss is the first starting section of the stack
-    mov sp, 0x7C00                      ; sp is the last location of the stack
-                                        ; stack grows downward untill it hits adress 0x7C00
-                                        ; Stack is first in first out memory 
-                                        ; The zero here is the begaining of the os
-
-    ;read here
-    mov [ebr_drive_number], dl
-    mov ax, 1                           ;LBA=1 second sector from disk
-    mov cl, 1                           ; 1 sector to read
-    mov bx, 0x7E00                      ;data after the bootloader
-    call disk_read
-
-    mov si, msg_hello                   ; putting the string hello into the si register
-    call puts
-
-    cli
-    hlt
 ;
 ;   Error handeling 
 ;
@@ -207,6 +256,8 @@ disk_reset:
 
 msg_loading:              db 'Loading...', ENDL, 0
 msg_read_failed:        db 'Read from disk failed!', ENDL, 0
-
+file_kernel_bin:        db 'KERNEL  BIN'
 times 510-($-$$) db 0
 dw 0AA55H
+
+buffer:
