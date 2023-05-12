@@ -45,7 +45,7 @@ start:
                                         ; The zero here is the begaining of the os
     ; Maybe needed for some bioses
     push es;
-    psuh word .after
+    push word .after
     retf
 .after:
     ;read here
