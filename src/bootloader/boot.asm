@@ -34,7 +34,7 @@ ebr_volume_label:               db 'MNILSSON183'        ;any 11 byte string padd
 ebr_system_id:                  db 'FAT12   '              ; 8 bytes padded
 
 start:
-       mov ax, 0                           ; cannot write to ds/ ex directly
+    mov ax, 0                           ; cannot write to ds/ ex directly
     mov ds, ax
     mov es, ax
                                         ; Init stack
